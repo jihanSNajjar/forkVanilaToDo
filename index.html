@@ -1,0 +1,311 @@
+<!DOCTYPE html5>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ToDo List</title>
+    <link href="style.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+        integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+
+<body>
+    <div class="container">
+        <div class="incontainer">
+            <h1> TODO List</h1>
+            <div class="div-button-add">
+                <span>add new task</span>
+                <button data-toggle-id="formElem">Add</button>
+            </div>
+            <form id="formElem" hidden>
+                <fieldset>
+                    <legend>Add New Task</legend>
+                    <label for="todo-desc">
+                        Add Task
+                        <input type="text" id="todo-desc" placeholder="Add new task">
+                    </label>
+                    <p hidden id="empt-task" class="emptTask">Pales enter a task! </p>
+                    <label class="lebalStatus">
+                        Select Status:
+                        <ul id="ul-status">
+                            <li> <label>
+                                    <input type="radio" id="state1" name="status" value="Completed">
+                                    Completed
+                                </label>
+                            </li>
+                            <li> <label>
+                                    <input type="radio" id="state2" name="status" value="Pending">
+                                    Pending
+                                </label>
+                            </li>
+                        </ul>
+                    </label>
+                </fieldset>
+                <button type="submit"> Save</button>
+            </form>
+            <div class="table-div">
+                <div id="div-search"><label for="search">
+                        <input type="search" id="search" placeholder="search by ">
+                        <!-- <i class="fa-solid fa-filter" id="filter-icon"></i> -->
+                        <select id="select-filter">
+                            <option value="ID">ID</option>
+                            <option value="suerID">User ID</option>
+                        </select>
+                        <i id="i-search" class="fa-solid fa-magnifying-glass"></i>
+                    </label>
+                    <table>
+
+                        <tbody id="tbody-search">
+
+                        </tbody>
+                    </table>
+                </div>
+                <table id="table-task">
+                    <thead>
+
+                        <tr>
+                            <th id="id">ID</th>
+                            <th id="description" colspan="3">ToDo Description</th>
+                            <th id="user">User ID</th>
+                            <th id="status">Status</th>
+                            <th id="action" class="action">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody-task">
+
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="7">
+                                Count: <span id="numOfTask">0</span>
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script>
+        var tasks;
+        const todoDesc = document.getElementById("todo-desc");
+        const formElem = document.getElementById("formElem");
+        const text = document.getElementById("todo-desc");
+        const taskStatus = document.querySelectorAll('input[name="status"]');
+        const table = document.getElementById("table-task");
+        const tbody = document.getElementById("tbody-task");
+        const numOfTask = document.getElementById("numOfTask");
+        const emptTask = document.getElementById("empt-task");
+        const search = document.querySelector('input[type="search"]');
+        const tSearch = document.getElementById("tbody-search");
+        const selectFilter = document.getElementById("select-filter");
+        const filterIcon = document.getElementById("filter-icon");
+        // const tasks=[{}];
+        const showTasks = (index, tasks, tTable) => {
+            // console.log(tasks)
+            const row = tTable.insertRow();
+            const id = row.insertCell();
+            const description = row.insertCell();
+            description.colSpan = 3;
+            // description.contentEditable = false;
+            const user = row.insertCell();
+            const status = row.insertCell();
+            id.textContent = tasks[index].id;
+            description.textContent = tasks[index].todo;
+            user.textContent = tasks[index].userId;
+            status.textContent = tasks[index].completed ? "Completed" : "Pending";
+            if (tTable === tbody) {
+                const action = row.insertCell();
+                if (tasks[index].completed) {
+                    status.closest("tr").classList.add("doneTask");
+                }
+                const icon = document.createElement("I");
+                const icon1 = document.createElement("I");
+                const icon2 = document.createElement("I");
+                const icon3 = document.createElement("I");
+                action.classList.add("action");
+                icon.classList.add("fa-solid", "fa-circle-check");
+                icon1.classList.add("fa-solid", "fa-pen-to-square")
+                icon2.classList.add("fa-solid", "fa-trash")
+                icon3.classList.add("fa-solid", "fa-circle-check");
+                description.classList.add("descriptionTask");
+                icon3.id = "editTask";
+                icon.id = "done";
+                icon1.id = "edit";
+                icon2.id = "delete";
+                action.appendChild(icon);
+                action.appendChild(icon1);
+                action.appendChild(icon2);
+                description.appendChild(icon3);
+                numOfTask.innerHTML = tasks.length;
+            }
+        }
+        const doneTask = (id, tasks) => {
+            const index = tasks.findIndex(task => task.id === parseInt(id));
+            return index;
+
+        }
+        const deleteTask = (id, tasks) => {
+            const indexToRemove = tasks.findIndex(task => task.id === parseInt(id))
+            tasks.splice(indexToRemove, 1)
+            // console.log(tasks)
+        }
+        const searchIDTask = (id, tasks) => {
+            const searchIndex = tasks.findIndex(task => task.id === parseInt(id));
+            return searchIndex;
+        }
+        const searchUserTask = (userID, tasks) => {
+            // console.log(tasks)
+
+            const searchUser = tasks.filter(task => task.userId === parseInt(userID));
+            console.log(searchUser)
+            return searchUser;
+        }
+        const saveTask = () => {
+            localStorage.setItem("tasks", JSON.stringify(tasks))
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedTasks = localStorage.getItem("tasks");
+            savedTasks !== null ? tasks = JSON.parse(savedTasks) : tasks = null;
+            if (savedTasks) {
+                for (const [index, task] of tasks.entries()) { showTasks(index, tasks, tbody) }
+            }
+            fetch("https://dummyjson.com/todos").then(response => response.json()).then(data => {
+                tasks = data.todos;
+                // console.log(tasks);
+                // for (const [index, task] of tasks.entries()) {
+                //     showTasks(index, tasks, tbody);
+                // }
+                // saveTask()
+
+            }
+            ).catch(error => {
+                console.log('Unable to fetch tasks ', error)
+            });
+            formElem.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const newTask = text.value;
+                if (newTask.trim() !== "") {
+                    let selectedValue;
+                    taskStatus.forEach((radio) => {
+                        if (radio.checked) {
+                            selectedValue = radio.value;
+                        }
+                    });
+                    // console.log(selectedValue);
+                    selectedValue == "Completed" ? selectedValue = true : selectedValue = false;
+                    const obj = {
+                        id: tasks.length + 1,
+                        todo: newTask, userId: Math.ceil(Math.random() * 100), completed: selectedValue,
+                    };
+
+                    tasks.push(obj);
+                    // numOfTask.innerHTML = tasks.length;
+                    saveTask()
+                    tbody.innerHTML = ""
+                    for (const [index, task] of tasks.entries()) { showTasks(index, tasks, tbody) }
+
+
+
+                    // fetch("https://dummyjson.com/todos", {
+                    //     method: "POST",
+                    //     headers: { 'Content-Type': 'application/json;charset=utf-8' },
+                    //     body: JSON.stringify(obj)
+                    // }).then(respnse => respnse.json()).then(data => console.log("new task add", data))
+                    //     .catch(error => { console.log("unable to add new task", error) });
+                    formElem.reset();
+
+
+
+                }
+                else {
+                    emptTask.hidden = !emptTask.hidden;
+                }
+            }
+            );
+            document.addEventListener('click', function (e) {
+                let id = e.target.dataset.toggleId;
+                let target = e.target;
+                let elem = document.getElementById(id);
+                if (id === "formElem") {
+                    target.textContent === "Add" ? target.textContent = "Close" : target.textContent = "Add";
+                    elem.hidden = !elem.hidden;
+                }
+                if (target.id == "i-search") {
+                    tSearch.innerHTML = "";
+                    const searching = search.value;
+                    if (selectFilter.value === "suerID") {
+                        const newTask = searchUserTask(searching, tasks);
+                        if (newTask.length < 1) {
+                            tSearch.innerHTML = "not found";
+                            return;
+                        }
+                        for (const [index, task] of newTask.entries()) {
+                            showTasks(index, newTask, tSearch);
+                        }
+                    }
+                    if (selectFilter.value === "ID") {
+                        const indexOfTask = searchIDTask(searching, tasks);
+                        if (indexOfTask === -1) {
+                            tSearch.innerHTML = "not found";
+                            return;
+                        }
+                        showTasks(indexOfTask, tasks, tSearch)
+                    }
+                }
+                if (target.id == "done") {
+
+                    const row = target.closest("tr");
+                    const donTas=doneTask(row.cells[0].textContent,tasks)
+                    tasks[donTas].completed === "Pending" ? tasks[donTas ].completed = "completed" : tasks[donTas].completed = "Pending";
+// showTasks(donTas,tasks,tbody)
+tasks[donTas].completed === "completed" ? row.classList.add("doneTask"):row.classList.remove("doneTask")
+row.cells[3].textContent=tasks[donTas].completed ;
+                    console.log(tasks[donTas ].completed)
+                    // saveTask();
+
+                }
+                if (target.id == "edit") {
+
+                    const row = target.closest("tr");
+                    row.cells[1].contentEditable = true;
+                    const editTask = row.cells[1].querySelector("#editTask")
+                    editTask.style.display = "inline";
+                    // saveTask()
+                }
+                if (target.id == "editTask") {
+                    const row = target.closest("tr");
+                    tasks[row.cells[0].textContent].todo = row.cells[1].textContent;
+                    const cell = target.parentElement;
+                    cell.contentEditable = false;
+                    target.style.display = "none";
+                    // saveTask()
+                }
+                if (target.id == "delete") {
+                    const row = target.closest("tr");
+                    const id = row.cells[0].textContent;
+                    deleteTask(id, tasks);
+                    // saveTask()
+                    row.remove();
+
+                    // numOfTask.innerHTML = tasks.length;
+                    tbody.innerHTML = ""
+                    for (const [index, task] of tasks.entries()) { showTasks(index, tasks, tbody) }
+                    // saveTask()
+
+                }
+                
+                saveTask()
+
+            });
+
+
+        })
+
+
+    </script>
+
+</body>
+
+</html>
