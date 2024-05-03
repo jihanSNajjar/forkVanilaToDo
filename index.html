@@ -285,6 +285,7 @@ row.cells[3].textContent=tasks[donTas].completed ;
                 if (target.id == "delete") {
                     const row = target.closest("tr");
                     const id = row.cells[0].textContent;
+                   if( confirm("Are you sure you wont to delete this task")) {
                     deleteTask(id, tasks);
                     // saveTask()
                     row.remove();
@@ -292,6 +293,8 @@ row.cells[3].textContent=tasks[donTas].completed ;
                     // numOfTask.innerHTML = tasks.length;
                     tbody.innerHTML = ""
                     for (const [index, task] of tasks.entries()) { showTasks(index, tasks, tbody) }
+                   }
+              
                     // saveTask()
 
                 }
